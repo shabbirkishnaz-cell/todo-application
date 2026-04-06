@@ -1,0 +1,79 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: karpenter-crd-webhook-fix
+  namespace: karpenter
+  annotations:
+    # Run AFTER karpenter controller + CRDs exist
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/sync-wave: "10"
+
+    # Clean up automatically
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        app: karpenter-crd-webhook-fix
+    spec:
+      serviceAccountName: karpenter-crd-patcher
+      restartPolicy: Never
+
+      priorityClassName: system-cluster-critical
+      tolerations:
+        - key: "CriticalAddonsOnly"
+          operator: Exists
+        - key: "node-role.kubernetes.io/control-plane"
+          operator: Exists
+        - key: "node-role.kubernetes.io/master"
+          operator: Exists
+
+      containers:
+        - name: patch
+          image: registry.k8s.io/kubectl:v1.31.2
+          imagePullPolicy: IfNotPresent
+          command:
+            - kubectl
+          args:
+            - patch
+            - crd
+            - nodepools.karpenter.sh
+            - "--type=json"
+            - "-p=[{\"op\":\"replace\",\"path\":\"/spec/conversion/webhook/clientConfig/service/namespace\",\"value\":\"karpenter\"}]"
+          resources:
+            requests:
+              cpu: 5m
+              memory: 16Mi
+            limits:
+              cpu: 50m
+              memory: 64Mi
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: karpenter-crd-webhook-fix-ec2
+  namespace: karpenter
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/sync-wave: "11"
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      serviceAccountName: karpenter-crd-patcher
+      restartPolicy: Never
+      priorityClassName: system-cluster-critical
+      containers:
+        - name: patch
+          image: registry.k8s.io/kubectl:v1.31.2
+          imagePullPolicy: IfNotPresent
+          command:
+            - kubectl
+          args:
+            - patch
+            - crd
+            - ec2nodeclasses.karpenter.k8s.aws
+            - "--type=json"
+            - "-p=[{\"op\":\"replace\",\"path\":\"/spec/conversion/webhook/clientConfig/service/namespace\",\"value\":\"karpenter\"}]"

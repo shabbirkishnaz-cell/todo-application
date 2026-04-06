@@ -1,0 +1,11 @@
+{{- if .Values.db.externalName.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.db.externalName.serviceName | default "todo-db" }}
+  labels:
+    {{- include "todo-app.labels" . | nindent 4 }}
+spec:
+  type: ExternalName
+  externalName: {{ .Values.db.externalName.host | quote }}
+{{- end }}

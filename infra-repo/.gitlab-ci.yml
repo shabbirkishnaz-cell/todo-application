@@ -1,0 +1,76 @@
+stages:
+  - fmt
+  - validate
+  - plan
+  - apply
+
+variables:
+  TF_IN_AUTOMATION: "true"
+  TF_INPUT: "false"
+  TF_CLI_ARGS: "-no-color"
+  TF_VERSION: "1.6.6"
+  TF_ROOT: "."
+
+default:
+  image:
+    name: hashicorp/terraform:1.6.6
+    entrypoint: [""]
+
+before_script:
+  - terraform --version
+  - cd $TF_ROOT
+
+fmt:
+  stage: fmt
+  script:
+    - terraform fmt -check -recursive
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH
+
+validate:
+  stage: validate
+  script:
+    - terraform init -backend=false
+    - terraform validate
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH
+
+plan:dev:
+  stage: plan
+  script:
+    - terraform init -reconfigure -backend-config=envs/dev/backend.hcl
+    - terraform plan -var-file=envs/dev/terraform.tfvars -out=tfplan-dev
+  artifacts:
+    paths:
+      - tfplan-dev
+    expire_in: 1 day
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+plan:prod:
+  stage: plan
+  script:
+    - terraform init -reconfigure -backend-config=envs/prod/backend.hcl
+    - terraform plan -var-file=envs/prod/terraform.tfvars -out=tfplan-prod
+  artifacts:
+    paths:
+      - tfplan-prod
+    expire_in: 1 day
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    
+
+apply:prod:
+  stage: apply
+  script:
+    - terraform init -reconfigure -backend-config=envs/prod/backend.hcl
+    - terraform apply -auto-approve tfplan-prod
+  dependencies:
+    - plan:prod
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: manual
+  allow_failure: false
+

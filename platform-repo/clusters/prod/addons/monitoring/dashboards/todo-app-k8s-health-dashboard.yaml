@@ -1,0 +1,90 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-todo-app-k8s-health
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  todo-app-k8s-health.json: |
+    {
+      "uid": "todo-app-k8s-health",
+      "title": "Todo App — K8s Health",
+      "timezone": "browser",
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "10s",
+      "tags": ["todo-app", "kubernetes"],
+      "templating": {
+        "list": [
+          {
+            "name": "namespace",
+            "type": "query",
+            "datasource": "Prometheus",
+            "refresh": 1,
+            "query": "label_values(kube_pod_info, namespace)",
+            "current": { "text": "todo-app", "value": "todo-app" }
+          },
+          {
+            "name": "app",
+            "type": "custom",
+            "query": "todo-app",
+            "current": { "text": "todo-app", "value": "todo-app" }
+          }
+        ]
+      },
+      "panels": [
+        {
+          "type": "timeseries",
+          "title": "Pods Ready (kube-state-metrics)",
+          "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+          "datasource": "Prometheus",
+          "targets": [
+            {
+              "expr": "sum(kube_pod_status_ready{namespace=\"$namespace\", condition=\"true\", pod=~\"todo-app-.*\"})",
+              "refId": "A",
+              "legendFormat": "ready pods"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Pod Restarts",
+          "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+          "datasource": "Prometheus",
+          "targets": [
+            {
+              "expr": "sum(increase(kube_pod_container_status_restarts_total{namespace=\"$namespace\", pod=~\"todo-app-.*\"}[5m]))",
+              "refId": "A",
+              "legendFormat": "restarts/5m"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "CPU (cores) — todo-app pods",
+          "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+          "datasource": "Prometheus",
+          "targets": [
+            {
+              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"$namespace\", pod=~\"todo-app-.*\", container=\"todo-app\"}[2m]))",
+              "refId": "A",
+              "legendFormat": "cpu cores"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Memory (bytes) — todo-app pods",
+          "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+          "datasource": "Prometheus",
+          "targets": [
+            {
+              "expr": "sum(container_memory_working_set_bytes{namespace=\"$namespace\", pod=~\"todo-app-.*\", container=\"todo-app\"})",
+              "refId": "A",
+              "legendFormat": "memory"
+            }
+          ]
+        }
+      ]
+    }

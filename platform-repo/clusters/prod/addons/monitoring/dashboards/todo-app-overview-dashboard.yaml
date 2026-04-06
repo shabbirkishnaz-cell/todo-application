@@ -1,0 +1,125 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-todo-app-overview
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  todo-app-overview.json: |
+    {
+      "uid": "todo-app-overview",
+      "title": "Todo App — Overview",
+      "timezone": "browser",
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "10s",
+      "tags": ["todo-app"],
+      "templating": {
+        "list": [
+          {
+            "name": "namespace",
+            "type": "query",
+            "datasource": "Prometheus",
+            "refresh": 1,
+            "query": "label_values(todo_app_requests_total, namespace)",
+            "current": { "text": "todo-app", "value": "todo-app" }
+          },
+          {
+            "name": "app",
+            "type": "query",
+            "datasource": "Prometheus",
+            "refresh": 1,
+            "query": "label_values(todo_app_requests_total, app)",
+            "current": { "text": "todo-app", "value": "todo-app" }
+          }
+        ]
+      },
+      "panels": [
+        {
+          "type": "stat",
+          "title": "Requests / sec (1m)",
+          "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+          "datasource": "Prometheus",
+          "targets": [
+            {
+              "expr": "sum(rate(todo_app_requests_total{namespace=\"$namespace\",app=\"$app\"}[1m]))",
+              "refId": "A"
+            }
+          ],
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "orientation": "horizontal" }
+        },
+        {
+          "type": "stat",
+          "title": "Errors / sec (1m)",
+          "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+          "datasource": "Prometheus",
+          "targets": [
+            {
+              "expr": "sum(rate(todo_app_errors_total{namespace=\"$namespace\",app=\"$app\"}[1m]))",
+              "refId": "A"
+            }
+          ],
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "orientation": "horizontal" }
+        },
+        {
+          "type": "stat",
+          "title": "Total Users",
+          "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+          "datasource": "Prometheus",
+          "targets": [
+            { "expr": "max(todo_app_users_total{namespace=\"$namespace\",app=\"$app\"})", "refId": "A" }
+          ],
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "orientation": "horizontal" }
+        },
+        {
+          "type": "stat",
+          "title": "Active Users (last 5m)",
+          "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+          "datasource": "Prometheus",
+          "targets": [
+            { "expr": "max(todo_app_active_users_5m{namespace=\"$namespace\",app=\"$app\"})", "refId": "A" }
+          ],
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "orientation": "horizontal" }
+        },
+
+        {
+          "type": "timeseries",
+          "title": "RPS (Requests/sec)",
+          "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+          "datasource": "Prometheus",
+          "targets": [
+            { "expr": "sum(rate(todo_app_requests_total{namespace=\"$namespace\",app=\"$app\"}[1m]))", "refId": "A" }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Errors/sec",
+          "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+          "datasource": "Prometheus",
+          "targets": [
+            { "expr": "sum(rate(todo_app_errors_total{namespace=\"$namespace\",app=\"$app\"}[1m]))", "refId": "A" }
+          ]
+        },
+
+        {
+          "type": "timeseries",
+          "title": "Logins/min & Signups/min",
+          "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+          "datasource": "Prometheus",
+          "targets": [
+            { "expr": "sum(rate(todo_app_logins_total{namespace=\"$namespace\",app=\"$app\"}[5m])) * 60", "refId": "A", "legendFormat": "logins/min" },
+            { "expr": "sum(rate(todo_app_signups_total{namespace=\"$namespace\",app=\"$app\"}[5m])) * 60", "refId": "B", "legendFormat": "signups/min" }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Active Users (5m) over time",
+          "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
+          "datasource": "Prometheus",
+          "targets": [
+            { "expr": "max(todo_app_active_users_5m{namespace=\"$namespace\",app=\"$app\"})", "refId": "A", "legendFormat": "active_users_5m" }
+          ]
+        }
+      ]
+    }

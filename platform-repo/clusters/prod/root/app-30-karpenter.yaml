@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: karpenter
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "30"
+spec:
+  project: platform
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: karpenter
+
+  source:
+    repoURL: oci://public.ecr.aws/karpenter/karpenter
+    chart: karpenter
+    targetRevision: "1.0.5"
+    helm:
+      values: |
+        # Karpenter will create its CRDs
+        installCRDs: true
+
+        # This is the controller SA (IRSA must already exist)
+        serviceAccount:
+          create: true
+          name: karpenter
+          annotations:
+            eks.amazonaws.com/role-arn: arn:aws:iam::057165950410:role/eksdemo2-karpenter-controller-irsa
+
+        settings:
+          clusterName: eksdemo2
+          clusterEndpoint: https://B7B0025928C8BB35576248EBC...gr7.us-east-1.eks.amazonaws.com
+          interruptionQueue: eksdemo2-karpenter-interruptions
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

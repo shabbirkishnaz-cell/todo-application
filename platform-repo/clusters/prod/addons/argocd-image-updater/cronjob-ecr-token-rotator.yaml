@@ -1,0 +1,69 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: ecr-token-rotator
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  schedule: "0 */6 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          serviceAccountName: ecr-token-rotator
+          restartPolicy: Never
+          volumes:
+            - name: tmp
+              emptyDir: {}
+          containers:
+            - name: rotator
+              image: amazon/aws-cli:2.15.57
+              imagePullPolicy: IfNotPresent
+              command: ["/bin/sh", "-lc"]
+              args:
+                - |
+                  set -euo pipefail
+
+                  echo "Generating ECR login password..."
+                  PASS="$(aws ecr get-login-password --region "${AWS_REGION}")"
+
+                  echo "Ensuring secret exists: ${SECRET_ID}"
+                  if aws secretsmanager describe-secret --secret-id "${SECRET_ID}" --region "${AWS_REGION}" >/dev/null 2>&1; then
+                    echo "Updating existing secret..."
+                    aws secretsmanager put-secret-value \
+                      --secret-id "${SECRET_ID}" \
+                      --secret-string "${PASS}" \
+                      --region "${AWS_REGION}" >/dev/null
+                  else
+                    echo "Creating secret..."
+                    aws secretsmanager create-secret \
+                      --name "${SECRET_ID}" \
+                      --secret-string "${PASS}" \
+                      --region "${AWS_REGION}" >/dev/null
+                  fi
+
+                  echo "Done."
+              env:
+                - name: AWS_REGION
+                  value: us-east-1
+                - name: SECRET_ID
+                  value: eksdemo2/prod/argocd-image-updater/ecr-login-password
+
+                # IMPORTANT: prevent aws-cli trying to write to /.aws when FS is read-only
+                - name: HOME
+                  value: /tmp
+                - name: AWS_EC2_METADATA_DISABLED
+                  value: "true"
+                - name: AWS_SHARED_CREDENTIALS_FILE
+                  value: /tmp/credentials
+                - name: AWS_CONFIG_FILE
+                  value: /tmp/config
+
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp

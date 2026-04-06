@@ -1,0 +1,15 @@
+server:
+  replicas: 2
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+
+controller:
+  replicas: 1
+
+configs:
+  rbac:
+    policy.default: role:readonly
+    policy.csv: |
+      g, admin, role:admin
+

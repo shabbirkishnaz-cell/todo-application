@@ -1,0 +1,73 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd-image-updater
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "15"
+spec:
+  project: platform
+
+  source:
+    repoURL: https://argoproj.github.io/argo-helm
+    chart: argocd-image-updater
+    targetRevision: 0.11.1
+    helm:
+      values: |
+        fullnameOverride: argocd-image-updater
+        namespaceOverride: argocd
+
+        image:
+          repository: quay.io/argoprojlabs/argocd-image-updater
+          tag: v0.15.0
+
+        serviceAccount:
+          create: true
+          name: argocd-image-updater
+          annotations:
+            eks.amazonaws.com/role-arn: arn:aws:iam::057165950410:role/eksdemo2-argocd-image-updater-irsa
+
+        extraEnv:
+          - name: AWS_REGION
+            value: us-east-1
+          - name: AWS_EC2_METADATA_DISABLED
+            value: "true"
+          - name: HOME
+            value: /tmp
+          - name: AWS_SHARED_CREDENTIALS_FILE
+            value: /tmp/credentials
+          - name: AWS_CONFIG_FILE
+            value: /tmp/config
+
+        config:
+          logLevel: info
+          gitCommitUser: "argocd-image-updater"
+          gitCommitEmail: "argocd-image-updater@local"
+
+          # ✅ ADD THIS
+          git:
+            credentials:
+              secret: argocd/argocd-image-updater-git-creds
+
+          registries:
+            - name: aws-ecr
+              api_url: https://057165950410.dkr.ecr.us-east-1.amazonaws.com
+              prefix: 057165950410.dkr.ecr.us-east-1.amazonaws.com
+              ping: true
+              default: true
+              credentials: pullsecret:argocd/ecr-basic-auth
+        argocd:
+          serverAddress: argocd-server.argocd.svc
+          insecure: true
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

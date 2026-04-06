@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: todo-app
+  namespace: argocd
+  annotations:
+    # Root-level ordering
+    argocd.argoproj.io/sync-wave: "60"
+
+    # Image Updater settings
+    argocd-image-updater.argoproj.io/image-list: todo-app=057165950410.dkr.ecr.us-east-1.amazonaws.com/todo-app
+    argocd-image-updater.argoproj.io/todo-app.update-strategy: newest-build
+    argocd-image-updater.argoproj.io/todo-app.image-name: todo-app
+    argocd-image-updater.argoproj.io/todo-app.allow-tags: regexp:^[0-9a-f]{7,40}$
+
+
+    # Write back to Git into your values file (same folder as the chart/values)
+    argocd-image-updater.argoproj.io/write-back-method: git:secret:argocd/argocd-image-updater-git-creds
+    argocd-image-updater.argoproj.io/write-back-target: helmvalues:values-prod.yaml
+    argocd-image-updater.argoproj.io/git-branch: main
+    argocd-image-updater.argoproj.io/todo-app.helm.image-name: image.repository
+    argocd-image-updater.argoproj.io/todo-app.helm.image-tag: image.tag
+
+spec:
+  project: platform
+
+  source:
+    repoURL: https://gitlab.com/learning-group1580903/Learning-project.git
+    targetRevision: main
+
+    # Deploy from your prod overlay folder (this is what your screenshot shows)
+    path: apps/todo-app
+
+    helm:
+      valueFiles:
+        - values-prod.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: todo-app
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

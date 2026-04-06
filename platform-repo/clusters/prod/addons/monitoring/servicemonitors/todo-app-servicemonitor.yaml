@@ -1,0 +1,26 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: todo-app
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+      - todo-app   
+  selector:
+    matchLabels:
+      app: todo-app   # <-- will match the Service label we’ll add below
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 15s
+
+    # ✅ copy labels FROM the Service INTO each time series
+  targetLabels:
+    - app
+    - env
+    - team
+    - app.kubernetes.io/version
+    - app.kubernetes.io/instance

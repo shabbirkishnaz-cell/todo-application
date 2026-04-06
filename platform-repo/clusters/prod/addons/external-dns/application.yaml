@@ -1,0 +1,52 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: external-dns
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  project: platform
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: external-dns
+  source:
+    repoURL: https://kubernetes-sigs.github.io/external-dns/
+    chart: external-dns
+    targetRevision: 1.14.4   # stable as of now
+    helm:
+      values: |
+        provider: aws
+        registry: txt
+        txtOwnerId: eksdemo2
+        policy: sync
+
+        interval: 1m
+        logLevel: info
+
+        domainFilters:
+          - myapp.todo.com     # 🔴 CHANGE THIS
+
+        serviceAccount:
+          create: true
+          name: external-dns
+          annotations:
+            eks.amazonaws.com/role-arn: arn:aws:iam::057165950410:role/eksdemo2-externaldns-irsa
+
+        sources:
+          - ingress
+          - service
+
+        aws:
+          region: us-east-1
+
+        extraArgs:
+          - --aws-zone-type=public   # or private
+          - --annotation-filter=external-dns.alpha.kubernetes.io/hostname
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

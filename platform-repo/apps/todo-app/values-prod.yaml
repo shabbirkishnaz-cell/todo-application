@@ -1,0 +1,42 @@
+replicaCount: 2
+image:
+  repository: 057165950410.dkr.ecr.us-east-1.amazonaws.com/todo-app
+  tag: 7747fd3e
+  pullPolicy: IfNotPresent
+appEnv: prod
+team: platform
+appVersion: 1.0.0
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8501
+  metricsPort: 8000
+db:
+  externalName:
+    enabled: true
+    serviceName: todo-db
+    host: eksdemo2-db-postgres.cozu88ygwox9.us-east-1.rds.amazonaws.com
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+env:
+- name: STREAMLIT_SERVER_PORT
+  value: "8501"
+- name: STREAMLIT_SERVER_ADDRESS
+  value: 0.0.0.0
+ingress:
+  enabled: true
+  className: alb
+  path: /
+  pathType: Prefix
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
+    alb.ingress.kubernetes.io/group.name: todo-prod
+    alb.ingress.kubernetes.io/success-codes: 200-399
+    alb.ingress.kubernetes.io/healthcheck-path: /

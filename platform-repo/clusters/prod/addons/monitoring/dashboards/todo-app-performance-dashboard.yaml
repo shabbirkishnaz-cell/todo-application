@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-todo-app-performance
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  todo-app-performance.json: |
+    {
+      "uid": "todo-app-performance",
+      "title": "Todo App — Performance",
+      "timezone": "browser",
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "10s",
+      "tags": ["todo-app"],
+      "templating": {
+        "list": [
+          {
+            "name": "namespace",
+            "type": "query",
+            "datasource": "Prometheus",
+            "refresh": 1,
+            "query": "label_values(todo_app_requests_total, namespace)",
+            "current": { "text": "todo-app", "value": "todo-app" }
+          },
+          {
+            "name": "app",
+            "type": "query",
+            "datasource": "Prometheus",
+            "refresh": 1,
+            "query": "label_values(todo_app_requests_total, app)",
+            "current": { "text": "todo-app", "value": "todo-app" }
+          }
+        ]
+      },
+      "panels": [
+        {
+          "type": "timeseries",
+          "title": "p95 latency (seconds) — histogram",
+          "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+          "datasource": "Prometheus",
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.95, sum by (le) (rate(todo_app_request_latency_seconds_bucket{namespace=\"$namespace\",app=\"$app\"}[5m])))",
+              "refId": "A",
+              "legendFormat": "p95"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "p99 latency (seconds) — histogram",
+          "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+          "datasource": "Prometheus",
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.99, sum by (le) (rate(todo_app_request_latency_seconds_bucket{namespace=\"$namespace\",app=\"$app\"}[5m])))",
+              "refId": "A",
+              "legendFormat": "p99"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Request rate by action (RPS)",
+          "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+          "datasource": "Prometheus",
+          "targets": [
+            {
+              "expr": "sum by (action) (rate(todo_app_requests_total{namespace=\"$namespace\",app=\"$app\"}[1m]))",
+              "refId": "A",
+              "legendFormat": "{{action}}"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Errors/sec by type",
+          "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+          "datasource": "Prometheus",
+          "targets": [
+            {
+              "expr": "sum by (type) (rate(todo_app_errors_total{namespace=\"$namespace\",app=\"$app\"}[1m]))",
+              "refId": "A",
+              "legendFormat": "{{type}}"
+            }
+          ]
+        }
+      ]
+    }
