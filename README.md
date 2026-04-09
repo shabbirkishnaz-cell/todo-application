@@ -1,3 +1,18 @@
+## 📌 Important Context
+
+This is a **production-style EKS platform** I built end-to-end. It was fully deployed and running on AWS with:
+- **Karpenter** for dynamic node provisioning
+- **KEDA** for event-driven autoscaling  
+- **Prometheus + Grafana** for observability
+- **Argo CD** for GitOps deployments
+- **External Secrets** for secure credential management
+
+The live deployment has been taken down to control AWS costs, but all infrastructure and deployment code is here.
+
+**CI/CD Pipelines** are in the original GitLab repository (pipelines in `.gitlab-ci.yml`).
+
+To see what was deployed: Check `infra-repo/` for Terraform (Karpenter, EKS, RDS) and `platform-repo/` for Kubernetes/Helm manifests.
+
 # ✅ Todo App Platform (AWS EKS + GitOps + RDS PostgreSQL)
 
 A production-style **Todo Web Application** deployed on **AWS EKS** using **Terraform (IaC)** + **Argo CD GitOps**, backed by **Amazon RDS PostgreSQL**, with **observability-ready metrics** and secure secret management.
@@ -191,3 +206,23 @@ MIT
 
 
 ---
+
+
+
+## 🔧 Key Technologies & Why
+
+- **Karpenter** — Dynamic node autoscaling based on pod resource requests (not just CPU)
+- **KEDA** — Event-driven pod autoscaling on custom metrics
+- **Argo CD** — GitOps-based deployments with automatic reconciliation
+- **External Secrets Operator** — Secure credential injection from AWS Secrets Manager
+- **AWS Load Balancer Controller** — Native AWS ALB routing on Kubernetes
+- **IRSA** — IAM roles for Kubernetes service accounts (zero static credentials)
+
+
+
+One Screenshot Helps
+If you have a screenshot of:
+
+The Argo CD dashboard showing the deployment
+The Grafana dashboards
+The Karpenter logs showing node scaling
