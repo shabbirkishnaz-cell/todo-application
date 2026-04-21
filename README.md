@@ -291,7 +291,7 @@ Once connection pooling is stable under load, the next planned additions are:
 *Root app managing all child applications with sync-wave ordering. All apps green and healthy.*
 
 ### Grafana — Application Overview Dashboard
-![Grafana Overview](docs/screenshots/grafana-overview.png)
+![Grafana Overview](docs/screenshots/grafana-performance.png)
 
 ### Grafana — Performance Dashboard
 ![Grafana Performance](docs/screenshots/grafana-overview.png)
