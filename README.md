@@ -294,7 +294,7 @@ Once connection pooling is stable under load, the next planned additions are:
 ![Grafana Overview](docs/screenshots/grafana-overview.png)
 
 ### Grafana — Performance Dashboard
-![Grafana Performance](docs/screenshots/grafana-performance.png)
+![Grafana Performance](docs/screenshots/grafana-overview.png)
 
 ### Grafana — Kubernetes Health Dashboard
 ![Grafana K8s Health](docs/screenshots/grafana-k8s-health.png)
