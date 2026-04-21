@@ -112,7 +112,6 @@ module "karpenter" {
   region                        = var.region
   oidc_provider_arn             = module.oidc_provider.oidc_provider_arn
   oidc_issuer_url               = module.eks_cluster.oidc_issuer_url
-  karpenter_controller_role_arn = module.karpenter.controller_role_arn
 
   karpenter_namespace      = "karpenter"
   karpenter_serviceaccount = "karpenter"

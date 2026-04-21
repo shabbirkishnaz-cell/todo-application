@@ -37,7 +37,7 @@ data "aws_iam_policy_document" "karpenter_interruption_queue" {
       type = "AWS"
       #identifiers = [aws_iam_role.karpenter_controller_irsa.arn]
       # or use the role arn string if role is in another module:
-      identifiers = [var.karpenter_controller_role_arn]
+      identifiers = [aws_iam_role.karpenter_controller.arn]
     }
 
     resources = [aws_sqs_queue.karpenter_interruptions.arn]

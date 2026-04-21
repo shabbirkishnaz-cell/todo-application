@@ -4,7 +4,7 @@ metadata:
   name: todo-app
   namespace: todo-app
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: todo-app
@@ -15,11 +15,6 @@ spec:
         app: todo-app
 
     spec:
-
-
-      ############################################################
-      # MAIN CONTAINER
-      ############################################################
       containers:
         - name: todo-app
           image: 057165950410.dkr.ecr.us-east-1.amazonaws.com/todo-app:latest
@@ -29,18 +24,12 @@ spec:
             - containerPort: 8501   # streamlit
             - containerPort: 8000   # prometheus metrics
 
-          ########################################################
-          # ENV FROM SECRET + CONFIGMAP (External Secrets)
-          ########################################################
           envFrom:
             - configMapRef:
                 name: todo-app-db-config
             - secretRef:
                 name: todo-app-db-secret
 
-          ########################################################
-          # APP ENV
-          ########################################################
           env:
             - name: APP_NAME
               value: "todo-app"
@@ -48,7 +37,12 @@ spec:
               value: "prod"
             - name: APP_VERSION
               value: "1.0"
-
+            - name: STREAMLIT_SERVER_HEADLESS
+              value: "true"
+            - name: STREAMLIT_SERVER_ENABLE_CORS
+              value: "false"
+            - name: STREAMLIT_SERVER_ENABLE_XSRF_PROTECTION
+              value: "false"
             - name: POD_NAME
               valueFrom:
                 fieldRef:
@@ -58,46 +52,31 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
 
-          
-          command: ["/bin/sh","-c"]
+          command: ["/bin/sh", "-c"]
           args:
             - |
               echo "Starting streamlit..."
-              exec streamlit run web.py --server.port 8501 --server.address 0.0.0.0
+              exec streamlit run web.py \
+                --server.port 8501 \
+                --server.address 0.0.0.0 \
+                --server.headless true \
+                --server.enableCORS false \
+                --server.enableXsrfProtection false
 
-          ########################################################
-          # READINESS PROBE
-          # Purpose:
-          # - tells Kubernetes when the pod is ready to receive traffic
-          # - if this fails, pod is removed from Service endpoints
-          #
-          # We use "/" on port 8501 because the app is already serving it
-          # and we want the simplest stable setup first.
-          ########################################################
           readinessProbe:
             httpGet:
-              path: /
+              path: /_stcore/health
               port: 8501
             initialDelaySeconds: 15
             periodSeconds: 5
-            timeoutSeconds: 2
+            timeoutSeconds: 3
             failureThreshold: 3
 
-          ########################################################
-          # LIVENESS PROBE
-          # Purpose:
-          # - tells Kubernetes if the container is stuck/broken
-          # - if this fails repeatedly, Kubernetes restarts the container
-          #
-          # Keep it simple and use the same endpoint for now.
-          ########################################################
           livenessProbe:
             httpGet:
-              path: /
+              path: /_stcore/health
               port: 8501
             initialDelaySeconds: 30
             periodSeconds: 10
-            timeoutSeconds: 2
+            timeoutSeconds: 3
             failureThreshold: 3
-
-

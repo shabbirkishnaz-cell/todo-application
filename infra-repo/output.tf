@@ -23,3 +23,7 @@ output "rds_master_secret_arn" {
   value = module.rds_postgres.master_user_secret_arn
 }
 
+
+output "db_secret_name" {
+  value = module.rds_postgres.db_secret_name
+}

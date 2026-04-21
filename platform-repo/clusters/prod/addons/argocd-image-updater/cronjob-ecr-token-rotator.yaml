@@ -37,13 +37,13 @@ spec:
                     echo "Updating existing secret..."
                     aws secretsmanager put-secret-value \
                       --secret-id "${SECRET_ID}" \
-                      --secret-string "${PASS}" \
+                      --secret-string "{\"password\":\"${PASS}\"}" \
                       --region "${AWS_REGION}" >/dev/null
                   else
                     echo "Creating secret..."
                     aws secretsmanager create-secret \
                       --name "${SECRET_ID}" \
-                      --secret-string "${PASS}" \
+                      --secret-string "{\"password\":\"${PASS}\"}" \
                       --region "${AWS_REGION}" >/dev/null
                   fi
 
@@ -53,8 +53,6 @@ spec:
                   value: us-east-1
                 - name: SECRET_ID
                   value: eksdemo2/prod/argocd-image-updater/ecr-login-password
-
-                # IMPORTANT: prevent aws-cli trying to write to /.aws when FS is read-only
                 - name: HOME
                   value: /tmp
                 - name: AWS_EC2_METADATA_DISABLED
@@ -63,7 +61,6 @@ spec:
                   value: /tmp/credentials
                 - name: AWS_CONFIG_FILE
                   value: /tmp/config
-
               volumeMounts:
                 - name: tmp
                   mountPath: /tmp

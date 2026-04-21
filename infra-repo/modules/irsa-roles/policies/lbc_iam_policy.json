@@ -40,7 +40,6 @@
       ],
       "Resource": "*"
     },
-
     {
       "Effect": "Allow",
       "Action": [
@@ -64,8 +63,6 @@
       ],
       "Resource": "*"
     },
-
-
     {
       "Effect": "Allow",
       "Action": ["ec2:CreateSecurityGroup"],
@@ -98,13 +95,8 @@
         "ec2:RevokeSecurityGroupIngress",
         "ec2:DeleteSecurityGroup"
       ],
-      "Resource": "*",
-      "Condition": {
-        "Null": { "aws:ResourceTag/elbv2.k8s.aws/cluster": "false" }
-      }
+      "Resource": "*"
     },
-
-
     {
       "Effect": "Allow",
       "Action": [
@@ -116,12 +108,9 @@
         "Null": { "aws:RequestTag/elbv2.k8s.aws/cluster": "false" }
       }
     },
-
     {
       "Effect": "Allow",
-      "Action": [
-        "elasticloadbalancing:AddTags"
-      ],
+      "Action": ["elasticloadbalancing:AddTags"],
       "Resource": [
         "arn:aws:elasticloadbalancing:*:*:targetgroup/*/*",
         "arn:aws:elasticloadbalancing:*:*:loadbalancer/net/*/*",
@@ -134,12 +123,9 @@
             "CreateLoadBalancer"
           ]
         },
-        "Null": {
-          "aws:RequestTag/elbv2.k8s.aws/cluster": "false"
-        }
+        "Null": { "aws:RequestTag/elbv2.k8s.aws/cluster": "false" }
       }
     },
-
     {
       "Effect": "Allow",
       "Action": ["elasticloadbalancing:AddTags", "elasticloadbalancing:RemoveTags"],
@@ -165,8 +151,6 @@
         "arn:aws:elasticloadbalancing:*:*:listener-rule/app/*/*/*"
       ]
     },
-
-
     {
       "Effect": "Allow",
       "Action": [
@@ -182,8 +166,6 @@
         "Null": { "aws:ResourceTag/elbv2.k8s.aws/cluster": "false" }
       }
     },
-
-
     {
       "Effect": "Allow",
       "Action": [
@@ -201,8 +183,6 @@
         "Null": { "aws:ResourceTag/elbv2.k8s.aws/cluster": "false" }
       }
     },
-
- 
     {
       "Effect": "Allow",
       "Action": [

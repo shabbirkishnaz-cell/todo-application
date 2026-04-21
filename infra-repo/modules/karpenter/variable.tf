@@ -27,4 +27,3 @@ variable "discovery_tag" {
   default = null
 }
 
-variable "karpenter_controller_role_arn" {}
