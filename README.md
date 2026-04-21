@@ -310,10 +310,6 @@ Once connection pooling is stable under load, the next planned additions are:
 ![Karpenter Scaling](docs/screenshots/karpenter-scaling.png)
 *Karpenter provisioning new t3 nodes as HPA scales pods during k6 ramp-up.*
 
-### k6 — Load Test Results
-![k6 Load Test](docs/screenshots/k6-load-test.png)
-*Load test summary — 100 concurrent users, p95 latency, error rate, and request throughput.*
-
 ### PgBouncer — Connection Pool Metrics
 ![PgBouncer Metrics](docs/screenshots/pgbouncer-metrics.png)
 *Active connections, wait queue depth, and pool utilization visible in Grafana.*
