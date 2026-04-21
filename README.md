@@ -290,21 +290,14 @@ Once connection pooling is stable under load, the next planned additions are:
 ![Argo CD Dashboard](docs/screenshots/argocd-dashboard4.png)
 *Root app managing all child applications with sync-wave ordering. All apps green and healthy.*
 
-### Argo CD — Sync Wave Deploy Order
-![Argo CD Sync Waves](docs/screenshots/argocd-sync-waves.png)
-*Applications deploying in order — namespaces → CRDs → controllers → monitoring → app.*
-
 ### Grafana — Application Overview Dashboard
 ![Grafana Overview](docs/screenshots/grafana-overview.png)
-*todo-app RPS, p95 latency, error rate, and pod count during k6 load test.*
 
 ### Grafana — Performance Dashboard
 ![Grafana Performance](docs/screenshots/grafana-performance.png)
-*Latency and throughput metrics showing application behaviour under 100 concurrent users.*
 
 ### Grafana — Kubernetes Health Dashboard
 ![Grafana K8s Health](docs/screenshots/grafana-k8s-health.png)
-*Pod restarts, resource usage, HPA replica count, and node pressure.*
 
 ### Karpenter — Node Scaling During Load Test
 ![Karpenter Scaling](docs/screenshots/karpenter-scaling.png)
