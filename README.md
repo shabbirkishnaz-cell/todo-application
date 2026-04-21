@@ -290,7 +290,18 @@ Once connection pooling is stable under load, the next planned additions are:
 ![Argo CD Dashboard](docs/screenshots/argocd-dashboard4.png)
 *Root app managing all child applications with sync-wave ordering. All apps green and healthy.*
 
+### Grafana — Application Overview Dashboard
+![Grafana Overview](docs/screenshots/grafana-overview.png)
 
+### Grafana — Performance Dashboard
+![Grafana Performance](docs/screenshots/grafana-performance.png)
+
+### Grafana — Kubernetes Health Dashboard
+![Grafana K8s Health](docs/screenshots/grafana-k8s-health.png)
+
+### Karpenter — Node Scaling During Load Test
+![Karpenter Scaling](docs/screenshots/karpenter-scaling.png)
+*Karpenter provisioning new t3 nodes as HPA scales pods during k6 ramp-up.*
 
 ### PgBouncer — Connection Pool Metrics
 ![PgBouncer Metrics](docs/screenshots/pgbouncer-metrics.png)
