@@ -284,7 +284,7 @@ Once connection pooling is stable under load, the next planned additions are:
 ## Screenshots
 
 ### Argo CD — All Applications Synced
-![Argo CD Dashboard](docs/screenshots/argocd-dashboard.png)
+![Argo CD Dashboard](docs/screenshots/argocd-dashboard.png)(docs/screenshots/argocd-dashboard2.png)(docs/screenshots/argocd-dashboard3.png)(docs/screenshots/argocd-dashboard4.png)
 *Root app managing all child applications with sync-wave ordering. All apps green and healthy.*
 
 ### Argo CD — Sync Wave Deploy Order
